@@ -49,7 +49,12 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
+<<<<<<< HEAD
     "mocha": "^9.1.3",
     "nodemon": "^3.1.10"
+=======
+    "mocha": "^11.2.2",
+    "nodemon": "^3.1.0"
+>>>>>>> 98ed37473ae3fd6d769a32351102a6aa169ccb3e
   }
 }

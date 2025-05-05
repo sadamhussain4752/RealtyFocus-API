@@ -6,8 +6,11 @@ const micrositeController = require('../../controllers/AddmicrositeController/Mi
 // ➤ Get all microsites (with optional query filtering)
 router.get('/', micrositeController.getAllMicrosites);
 
+// ➤ Get a microsite by Name
+router.get('/:name', micrositeController.getMicrositeByName);
+
 // ➤ Get a microsite by ID
-router.get('/:id', micrositeController.getMicrositeById);
+//router.get('/:id', micrositeController.getMicrositeById);
 
 // ➤ Filter microsites by ID (if needed)
 router.post('/filter', micrositeController.getAllMicrositesByID);
