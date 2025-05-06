@@ -12,6 +12,7 @@ exports.getAllMicrosites = async (req, res) => {
 };
 
 // Get all microsites in descending order with pagination, optionally filtering for featured microsites
+
 exports.getAllMicrositesByID = async (req, res) => {
   try {
     const { project_type, page = 1, limit = 10 } = req.query; // Get query parameters
@@ -89,6 +90,30 @@ exports.getMicrositeByName = async (req, res) => {
       [microsite.micro_id]
     );
     microsite.price = priceRows.length > 0 ? priceRows : [];
+
+
+    const [floorRows] = await pool.query(
+      'SELECT * FROM `floor_plan` WHERE `micro_id` = ?',
+      [microsite.micro_id]
+    );
+    microsite.floorplan = floorRows.length > 0 ? floorRows : [];
+
+
+    const amIds = microsite.details.am_id
+      .split(',')
+      .map(id => parseInt(id.trim(), 10))
+      .filter(id => !isNaN(id));
+
+    const placeholders = amIds.map(() => '?').join(',');
+    const [amenitiesRows] = await pool.query(
+      `SELECT * FROM \`amenities\` WHERE \`am_id\` IN (${placeholders})`,
+      amIds
+    );
+
+    microsite.amenities = amenitiesRows.length > 0 ? amenitiesRows : [];
+
+
+
 
     res.status(200).json(microsite);
   } catch (error) {
