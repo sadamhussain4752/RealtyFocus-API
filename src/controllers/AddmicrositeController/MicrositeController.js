@@ -120,7 +120,38 @@ exports.getMicrositeByName = async (req, res) => {
     res.status(500).json({ error: 'Error fetching microsite', message: error.message });
   }
 };
+exports.getMicrositesByBuilderID = async (req, res) => {
+  try {
+    const { builder_id } = req.params;
 
+    if (!builder_id) {
+      return res.status(400).json({ error: 'builder_id is required' });
+    }
+
+    const query = `
+      SELECT m.*, md.*,  ty.*
+      FROM microsite m
+      LEFT JOIN microsite_detail md ON m.micro_id = md.micro_id
+      LEFT JOIN builder b ON md.builder_id = b.builder_id
+      LEFT JOIN prop_type ty ON md.type_id = ty.type_id
+      WHERE b.builder_id = ?
+      ORDER BY m.micro_id DESC
+    `;
+
+    const [rows] = await pool.query(query, [builder_id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'No microsites found for this builder' });
+    }
+
+    res.status(200).json({
+      total: rows.length,
+      data: rows,
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching microsites for builder', message: error.message });
+  }
+};
 /*
 // Get microsite by ID with its details
 exports.getMicrositeById = async (req, res) => {
