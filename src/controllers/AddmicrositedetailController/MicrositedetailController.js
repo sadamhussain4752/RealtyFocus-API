@@ -3,12 +3,18 @@ const pool = require('../../db');
 // Get all microsite details
 exports.getAllMicrositeDetails = async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM microsite_detail');
+    const [rows] = await pool.query(`
+      SELECT md.*, m.*
+      FROM microsite_detail md
+      JOIN microsite m ON md.micro_id = m.micro_id
+    `);
+
     res.status(200).json(rows);
   } catch (error) {
     res.status(500).json({ error: 'Error fetching microsite details', message: error.message });
   }
 };
+
 
 // Get microsite detail by ID
 exports.getMicrositeDetailById = async (req, res) => {
