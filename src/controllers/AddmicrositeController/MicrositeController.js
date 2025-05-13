@@ -211,7 +211,7 @@ exports.createMicrosite = async (req, res) => {
       `INSERT INTO microsite 
       (name, possession, project_type, rera_no, possession_date, no_of_units, total_area, location, sub_location, zone, city, sprice) 
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [name, possession, project_type, rera_no, possession_date, no_of_units, total_area, location, sub_location, zone, city, sprice]
+      [name, possession, project_type, rera_no, 'null', no_of_units, total_area, location, sub_location, zone, city, sprice]
     );
 
     res.status(201).json({ message: 'Microsite created successfully', micro_id: result.insertId });

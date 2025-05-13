@@ -13,11 +13,11 @@ exports.getAllAmenities = async (req, res) => {
 
 // ➤ Create a New Amenity (CREATE)
 exports.createAmenity = async (req, res) => {
-  const { name, description } = req.body;
+  const { name, image } = req.body;
   try {
     const [result] = await pool.query(
-      'INSERT INTO amenities (name, description) VALUES (?, ?)',
-      [name, description]
+      'INSERT INTO amenities (name, image) VALUES (?, ?)',
+      [name, image]
     );
     res.json({ id: result.insertId, message: 'Amenity added successfully' });
   } catch (error) {
@@ -28,11 +28,11 @@ exports.createAmenity = async (req, res) => {
 // ➤ Update an Amenity (UPDATE)
 exports.updateAmenity = async (req, res) => {
   const { id } = req.params;
-  const { name, description } = req.body;
+  const { name, image } = req.body;
   try {
     const [result] = await pool.query(
-      'UPDATE amenities SET name = ?, description = ? WHERE id = ?',
-      [name, description, id]
+      'UPDATE amenities SET name = ? , image = ? WHERE am_id = ?',
+      [name, image, id]
     );
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Amenity not found' });
@@ -47,7 +47,7 @@ exports.updateAmenity = async (req, res) => {
 exports.deleteAmenity = async (req, res) => {
   const { id } = req.params;
   try {
-    const [result] = await pool.query('DELETE FROM amenities WHERE id = ?', [id]);
+    const [result] = await pool.query('DELETE FROM amenities WHERE am_id = ?', [id]);
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Amenity not found' });
     }
