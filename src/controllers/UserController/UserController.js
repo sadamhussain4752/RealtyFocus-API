@@ -78,29 +78,29 @@ const updateAdmin = async (adminId, updateData) => {
   }
 };
 
-const sendWhatsAppMessage = async (phoneNumber,verificationCode) => {
+const sendWhatsAppMessage = async (phoneNumber, verificationCode) => {
   try {
-      // Step 1: Call the OPT-IN API
-      const optInUrl = `https://media.smsgupshup.com/GatewayAPI/rest?method=OPT_IN&format=json&userid=2000247171&password=9fBqPu7%23&phone_number=${phoneNumber}&v=1.1&auth_scheme=plain&channel=WHATSAPP`;
-      const optInResponse = await axios.get(optInUrl);
+    // Step 1: Call the OPT-IN API
+    const optInUrl = `https://media.smsgupshup.com/GatewayAPI/rest?method=OPT_IN&format=json&userid=2000247171&password=9fBqPu7%23&phone_number=${phoneNumber}&v=1.1&auth_scheme=plain&channel=WHATSAPP`;
+    const optInResponse = await axios.get(optInUrl);
 
-      if (optInResponse.data.response.status === 'success') {
-          console.log('Opt-In successful:', optInResponse.data.response.details);
+    if (optInResponse.data.response.status === 'success') {
+      console.log('Opt-In successful:', optInResponse.data.response.details);
 
-          // Step 2: Call the message API
-          const sendMessageUrl = `https://media.smsgupshup.com/GatewayAPI/rest?userid=2000247171&password=9fBqPu7%23&send_to=${phoneNumber}&v=1.1&format=json&msg_type=TEXT&method=SENDMESSAGE&msg=${verificationCode}+is+your+verification+code.+For+your+security%2C+do+not+share+this+code.&isTemplate=true&footer=This+code+expires+in+10+minute.`;
-          const sendMessageResponse = await axios.get(sendMessageUrl);
+      // Step 2: Call the message API
+      const sendMessageUrl = `https://media.smsgupshup.com/GatewayAPI/rest?userid=2000247171&password=9fBqPu7%23&send_to=${phoneNumber}&v=1.1&format=json&msg_type=TEXT&method=SENDMESSAGE&msg=${verificationCode}+is+your+verification+code.+For+your+security%2C+do+not+share+this+code.&isTemplate=true&footer=This+code+expires+in+10+minute.`;
+      const sendMessageResponse = await axios.get(sendMessageUrl);
 
-          if (sendMessageResponse.data.response.status === 'success') {
-              console.log('Message sent successfully:', sendMessageResponse.data);
-          } else {
-              console.error('Failed to send message:', sendMessageResponse.data.response.details);
-          }
+      if (sendMessageResponse.data.response.status === 'success') {
+        console.log('Message sent successfully:', sendMessageResponse.data);
       } else {
-          console.error('Opt-In failed:', optInResponse.data.response.details);
+        console.error('Failed to send message:', sendMessageResponse.data.response.details);
       }
+    } else {
+      console.error('Opt-In failed:', optInResponse.data.response.details);
+    }
   } catch (error) {
-      console.error('Error occurred:', error.message);
+    console.error('Error occurred:', error.message);
   }
 };
 
@@ -141,7 +141,7 @@ function generateVerificationCode() {
 
 module.exports = {
   login: async (req, res) => {
-    const { email, password, mobilenumber,google_signin,fcm_token } = req.body;
+    const { email, password, mobilenumber, google_signin, fcm_token } = req.body;
 
     try {
       // Find user by username
@@ -160,24 +160,24 @@ module.exports = {
           mobilenumber ? { mobilenumber } : { email }
         );
         res
-        .status(200)
-        .json({
-          success: true,
-          userId: user._id,
-          UserType: user.UserType,
-        });
+          .status(200)
+          .json({
+            success: true,
+            userId: user._id,
+            UserType: user.UserType,
+          });
       } else {
         user = await User.findOne(
           mobilenumber ? { mobilenumber } : { email }
         );
-  
+
         // Check if user exists
         if (!user) {
           return res
             .status(401)
             .json({ success: false, message: "Invalid credentials" });
         }
-        console.log(!user.verified  , user.UserType === "3");
+        console.log(!user.verified, user.UserType === "3");
         // Check if user exists
         if (!user.verified || user.OTPNumber || user.UserType === "3") {
           // Send verification code via Twilio SMS
@@ -191,12 +191,12 @@ module.exports = {
           });
         }
 
-        if(user.UserType === "1" && fcm_token){
+        if (user.UserType === "1" && fcm_token) {
           user.fcm_token = fcm_token;
           // Save the updated Product
           const updateduser = await user.save();
         }
-  
+
         // Check password
         if (!mobilenumber) {
           const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -206,14 +206,14 @@ module.exports = {
               .json({ success: false, message: "Invalid credentials" });
           }
         }
-  
+
         // Generate JWT token
         const token = jwt.sign(
           { email: user.email, userId: user._id, UserType: user.UserType },
           "ems47524752",
           { expiresIn: "24h" }
         );
-  
+
         res
           .status(200)
           .json({
@@ -223,14 +223,14 @@ module.exports = {
             UserType: user.UserType,
           });
       }
-      
+
     } catch (error) {
       console.error(error);
       res.status(500).json({ success: false, error: "Server error" });
     }
   },
 
-  register: async (req, res,google_signin) => {
+  register: async (req, res, google_signin) => {
     try {
       let newAdmin;
 
@@ -300,8 +300,8 @@ module.exports = {
 
         };
         return res
-        .status(200).json(response)
-        
+          .status(200).json(response)
+
       }
 
       if (UserType === "2") {
@@ -541,7 +541,7 @@ module.exports = {
       if (!token) {
         return res.status(401).json({ success: false, message: "Unauthorized: No token provided" });
       }
-  
+
       // Verify the token
       let decoded;
       try {
@@ -549,8 +549,8 @@ module.exports = {
       } catch (err) {
         return res.status(401).json({ success: false, message: "Unauthorized: Invalid token" });
       }
-      console.log(decoded,"decoded");
-      
+      console.log(decoded, "decoded");
+
       // Check if the admin with the given ID exists
       const adminToDelete = await User.findById(adminId);
 
@@ -573,46 +573,46 @@ module.exports = {
     }
   },
 
-userGetById: async (req, res) => {
-  try {
-    const token = req.headers.authorization?.split(" ")[1]; // Extract token
-    if (!token) {
-      return res.status(401).json({ success: false, message: "Unauthorized: No token provided" });
-    }
-
-    // Verify the token
-    let decoded;
+  userGetById: async (req, res) => {
     try {
-      decoded = jwt.verify(token, "ems47524752"); // Use the same secret key used in login
-    } catch (err) {
-      return res.status(401).json({ success: false, message: "Unauthorized: Invalid token" });
+      const token = req.headers.authorization?.split(" ")[1]; // Extract token
+      if (!token) {
+        return res.status(401).json({ success: false, message: "Unauthorized: No token provided" });
+      }
+
+      // Verify the token
+      let decoded;
+      try {
+        decoded = jwt.verify(token, "ems47524752"); // Use the same secret key used in login
+      } catch (err) {
+        return res.status(401).json({ success: false, message: "Unauthorized: Invalid token" });
+      }
+      console.log(decoded, "decoded");
+
+
+      // const userId = req.params.id;
+
+      // Check if the user with the given ID exists
+      const userData = await User.findById(decoded.userId);
+
+      if (!userData) {
+        return res.status(404).json({ success: false, error: "User not found" });
+      }
+
+      // Check if user is verified
+      if (!userData?.verified) {
+        return res.status(401).json({ success: false, message: "Account not Verified" });
+      }
+
+      res.status(200).json({
+        success: true,
+        User: userData,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, error: "Server error" });
     }
-    console.log(decoded,"decoded");
-    
-
-    // const userId = req.params.id;
-
-    // Check if the user with the given ID exists
-    const userData = await User.findById(decoded.userId);
-
-    if (!userData) {
-      return res.status(404).json({ success: false, error: "User not found" });
-    }
-
-    // Check if user is verified
-    if (!userData?.verified) {
-      return res.status(401).json({ success: false, message: "Account not Verified" });
-    }
-
-    res.status(200).json({
-      success: true,
-      User: userData,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, error: "Server error" });
-  }
-},
+  },
   updateAdmin: async (req, res) => {
     try {
       const adminId = req.params.id;
@@ -659,13 +659,13 @@ userGetById: async (req, res) => {
 
   updateUsers: async (req, res) => {
     try {
-      
+
       const updateData = req.body;
       const token = req.headers.authorization?.split(" ")[1]; // Extract token
       if (!token) {
         return res.status(401).json({ success: false, message: "Unauthorized: No token provided" });
       }
-  
+
       // Verify the token
       let decoded;
       try {
@@ -674,7 +674,7 @@ userGetById: async (req, res) => {
         return res.status(401).json({ success: false, message: "Unauthorized: Invalid token" });
       }
       const UserId = decoded.userId;
-      console.log(decoded,"decoded");
+      console.log(decoded, "decoded");
 
       const userToUpdate = await User.findById(UserId);
 

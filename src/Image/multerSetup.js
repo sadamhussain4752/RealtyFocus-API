@@ -3,11 +3,11 @@ const { Storage } = require('@google-cloud/storage');
 const path = require("path");
 
 const storage = new Storage({
-  keyFilename: path.join(__dirname, '..', 'file', 'email-js-1a09b-firebase-adminsdk-ensw9-93ddb0e54d.json'),
-  projectId: 'email-js-1a09b',
+  keyFilename: require("../file/realtyfocus-94962-firebase-adminsdk-fbsvc-58e31fd75f.json"),
+  projectId: 'realtyfocus-94962',
 });
 
-const bucketName = 'email-js-1a09b.appspot.com';
+const bucketName = 'realtyfocus-94962.appspot.com';
 const bucket = storage.bucket(bucketName);
 
 const multerMemoryStorage = multer.memoryStorage();

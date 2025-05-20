@@ -7,6 +7,8 @@ const AWS = require('aws-sdk');
 require('aws-sdk/lib/maintenance_mode_message').suppress = true;
 require('dotenv').config();
 
+
+
 const cors = require("cors"); // Import cors middleware
 const bodyParser = require("body-parser");
 const mysql = require("mysql2");
@@ -29,6 +31,7 @@ const UserRoleRoutes = require("./routes/UserRoleRoutes/UserRoleRoutes");
 const amenitiesRoutes = require('./routes/AmenitiesRoutes/amenities');
 const specificationsRoutes = require('./routes/SpecificationsRoutes/specifications');
 const BankapprovalRoutes = require('./routes/BankapprovalRoutes/bankapprovalRoutes');
+const LegalapprovalRoutes = require('./routes/LegalapprovalRoutes/LegalapprovalRoutes');
 const BlogsRoutes = require('./routes/AddBlogsRoutes/BlogsRoutes');
 const BuilderRoutes = require('./routes/AddBuilderRoutes/builderRoutes');
 const FloorPlanRoutes = require('./routes/AddFloorRoutes/floorPlanRoutes');
@@ -38,6 +41,12 @@ const MicositeRoutes = require('./routes/AddMicoSiteRoutes/MicositeRoutes');
 const MicositedetailRoutes = require('./routes/AddmicrositedetailRoutes/MicositedetailRoutes');
 const MicrositeRatingRoutes = require('./routes/AddMicrositeRatingRoutes/MicrositeRatingRoutes');
 const PriceRoutes = require('./routes/AddPriceRoutes/PriceRoutes');
+const PropstatusRoutes = require('./routes/AddPropstatusRoutes/PropstatusRoutes');
+const PropTypeRoutes = require('./routes/AddPropTypeRoutes/PropTypeRoutes');
+const MicrositeMetaTagRoutes = require('./routes/AddMicrositeMetaTagRoutes/MicrositeMetaTagRoutes');
+const accessRoutes = require("./routes/accessControl");
+const profileRoutes = require("./routes/ProfileRoutes/profileRoutes");
+
 
 
 
@@ -45,6 +54,8 @@ const PriceRoutes = require('./routes/AddPriceRoutes/PriceRoutes');
 const app = express();
 // Use cors middleware
 app.use(cors());
+
+
 
 // Use express.static to serve static files (including images)
 app.use(express.static(path.join(__dirname, "./../uploads")));
@@ -95,6 +106,7 @@ app.use("/api/task", TaskRoutes);
 app.use('/api/amenities', amenitiesRoutes);
 app.use('/api/specifications', specificationsRoutes);
 app.use('/api/bankapproval', BankapprovalRoutes);
+app.use('/api/legalapproval', LegalapprovalRoutes);
 app.use('/api/blogs', BlogsRoutes);
 app.use('/api/builders', BuilderRoutes);
 app.use('/api/floor-plans', FloorPlanRoutes);
@@ -103,8 +115,12 @@ app.use('/api/meta', MetaRoutes);
 app.use('/api/microsites', MicositeRoutes);
 app.use('/api/microsite_detail', MicositedetailRoutes);
 app.use('/api/microsite_rating', MicrositeRatingRoutes);
-app.use('/api/microsite_rating', MicrositeRatingRoutes);
+app.use('/api/microsite-meta-tag', MicrositeMetaTagRoutes);
 app.use('/api/price', PriceRoutes);
+app.use('/api/prop-status', PropstatusRoutes);
+app.use('/api/prop-type', PropTypeRoutes);
+app.use("/api/access", accessRoutes);
+app.use("/api/profile", profileRoutes);
 
 
 

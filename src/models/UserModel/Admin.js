@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const AdminSchema = new mongoose.Schema({
   storename: { type: String, required: true },
   storeaddress: { type: String, required: true },
-  admin_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User'},
+  admin_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   storetimming: { type: Object, required: true },
   lat: { type: Number, required: true },
   log: { type: Number, unique: false },

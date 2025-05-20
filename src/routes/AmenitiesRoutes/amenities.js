@@ -1,16 +1,21 @@
-// routes/amenities.js
-const express = require('express');
+// routes/amenitiesRoutes.js
+const express = require("express");
+const multer = require("multer");
 const router = express.Router();
+
 const {
   getAllAmenities,
   createAmenity,
   updateAmenity,
   deleteAmenity,
-} = require('../../controllers/AddAmenities/amenitiesController');
+} = require("../../controllers/AddAmenities/amenitiesController");
 
-router.get('/', getAllAmenities);         // GET all amenities
-router.post('/', createAmenity);          // CREATE a new amenity
-router.put('/:id', updateAmenity);        // UPDATE an amenity by ID
-router.delete('/:id', deleteAmenity);     // DELETE an amenity by ID
+// Multer memory storage for file uploads
+const upload = multer({ storage: multer.memoryStorage() });
+
+router.get("/", getAllAmenities);
+router.post("/", upload.single("image"), createAmenity);
+router.put("/:id", upload.single("image"), updateAmenity);
+router.delete("/:id", deleteAmenity);
 
 module.exports = router;

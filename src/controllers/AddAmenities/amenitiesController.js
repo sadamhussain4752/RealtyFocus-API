@@ -1,58 +1,74 @@
-// amenitiesController.js
-const pool = require('../../db');
+// controllers/AddAmenities/amenitiesController.js
+const pool = require("../../db");
+const { firebaseMulterHandler } = require("../../firebase/firebaseSetup");
 
-// ➤ Get All Amenities (READ)
+// Get all amenities
 exports.getAllAmenities = async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM amenities');
+    const [rows] = await pool.query("SELECT * FROM amenities");
     res.json(rows);
   } catch (error) {
-    res.status(500).json({ error: 'Error fetching amenities', message: error.message });
+    res.status(500).json({ error: "Error fetching amenities", message: error.message });
   }
 };
 
-// ➤ Create a New Amenity (CREATE)
+// Create a new amenity
 exports.createAmenity = async (req, res) => {
-  const { name, image } = req.body;
   try {
+    const { name } = req.body;
+    let image = null;
+
+    if (req.file) {
+      image = await firebaseMulterHandler(req.file.buffer, req.file.originalname, "amenities");
+    }
+
     const [result] = await pool.query(
-      'INSERT INTO amenities (name, image) VALUES (?, ?)',
+      "INSERT INTO amenities (name, image) VALUES (?, ?)",
       [name, image]
     );
-    res.json({ id: result.insertId, message: 'Amenity added successfully' });
+
+    res.json({ id: result.insertId, message: "Amenity added successfully" });
   } catch (error) {
-    res.status(500).json({ error: 'Error adding amenity', message: error.message });
+    res.status(500).json({ error: "Error adding amenity", message: error.message });
   }
 };
 
-// ➤ Update an Amenity (UPDATE)
+// Update existing amenity
 exports.updateAmenity = async (req, res) => {
-  const { id } = req.params;
-  const { name, image } = req.body;
   try {
-    const [result] = await pool.query(
-      'UPDATE amenities SET name = ? , image = ? WHERE am_id = ?',
-      [name, image, id]
-    );
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: 'Amenity not found' });
+    const { id } = req.params;
+    const { name } = req.body;
+    let imageUrl = req.body.image; // Keep old image if no new upload
+
+    if (req.file) {
+      imageUrl = await firebaseMulterHandler(req.file.buffer, req.file.originalname, "amenities");
     }
-    res.json({ message: 'Amenity updated successfully' });
+
+    const [result] = await pool.query(
+      "UPDATE amenities SET name = ?, image = ? WHERE am_id = ?",
+      [name, imageUrl, id]
+    );
+
+    if (result.affectedRows === 0)
+      return res.status(404).json({ message: "Amenity not found" });
+
+    res.json({ message: "Amenity updated successfully" });
   } catch (error) {
-    res.status(500).json({ error: 'Error updating amenity', message: error.message });
+    res.status(500).json({ error: "Error updating amenity", message: error.message });
   }
 };
 
-// ➤ Delete an Amenity (DELETE)
+// Delete amenity
 exports.deleteAmenity = async (req, res) => {
-  const { id } = req.params;
   try {
-    const [result] = await pool.query('DELETE FROM amenities WHERE am_id = ?', [id]);
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: 'Amenity not found' });
-    }
-    res.json({ message: 'Amenity deleted successfully' });
+    const { id } = req.params;
+    const [result] = await pool.query("DELETE FROM amenities WHERE am_id = ?", [id]);
+
+    if (result.affectedRows === 0)
+      return res.status(404).json({ message: "Amenity not found" });
+
+    res.json({ message: "Amenity deleted successfully" });
   } catch (error) {
-    res.status(500).json({ error: 'Error deleting amenity', message: error.message });
+    res.status(500).json({ error: "Error deleting amenity", message: error.message });
   }
 };

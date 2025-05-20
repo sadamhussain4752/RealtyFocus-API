@@ -1,33 +1,28 @@
-// authController.js
-const jwt = require('jsonwebtoken');
-const secretKey = process.env.SECRET_KEY || 'mn1f4mfulKNrMZ0aAqbrw';
+const jwt = require("jsonwebtoken");
+const pool = require("../db");
+
+const secretKey = process.env.SECRET_KEY || "mn1f4mfulKNrMZ0aAqbrw";
 
 const generateToken = (user) => {
-  const token = jwt.sign(user, secretKey, { expiresIn: '15m' });
-  return token;
+  return jwt.sign({ id: user.id, role: user.role }, secretKey, { expiresIn: "1d" });
 };
 
-const authenticateUser = (email, password) => {
-  if (email === 'sadam' && password === 'password123') {
-    const user = { id: 1, email: 'sadam' };
-    return generateToken(user);
-  }
-  return null;
-};
-
-const getNewToken = (req, res) => {
+const getNewToken = async (req, res) => {
   const { email, password } = req.body;
+  try {
+    const [rows] = await pool.query("SELECT * FROM admin WHERE email = ? AND password = ?", [email, password]);
 
-  const token = authenticateUser(email, password);
+    if (!rows.length) {
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
+    }
 
-  if (token) {
-    res.status(200).json({ success: true, token });
-  } else {
-    res.status(401).json({ success: false, error: 'Invalid credentials' });
+    const user = rows[0];
+    const token = generateToken(user);
+    res.json({ success: true, token, user });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
-module.exports = {
-  getNewToken,
-  // Add other authentication-related controller methods here
-};
+module.exports = { getNewToken, generateToken };

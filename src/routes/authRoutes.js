@@ -1,8 +1,7 @@
-// authRoutes.js
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const authController = require('../controllers/authController');
+const authController = require("../controllers/authController");
 
-router.post('/get-new-token', authController.getNewToken);
+router.post("/login", authController.getNewToken);
 
 module.exports = router;

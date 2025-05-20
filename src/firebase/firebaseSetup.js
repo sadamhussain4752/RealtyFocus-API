@@ -1,44 +1,36 @@
 // firebase/firebaseSetup.js
-const admin = require('firebase-admin');
-const serviceAccount = require('../file/email-js-1a09b-firebase-adminsdk-ensw9-93ddb0e54d.json');
+const admin = require("firebase-admin");
+const { getStorage } = require("firebase-admin/storage");
+const { v4: uuidv4 } = require("uuid");
+const path = require("path");
+
+// Load your service account key JSON file
+const serviceAccount = require("../file/realtyfocus-94962-firebase-adminsdk-fbsvc-58e31fd75f.json");
 
 admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    storageBucket: 'gs://email-js-1a09b.appspot.com',
+  credential: admin.credential.cert(serviceAccount),
+  storageBucket: "realtyfocus-94962.appspot.com", // Your exact bucket name
+});
+
+const bucket = getStorage().bucket();
+
+console.log("Using bucket:", bucket.name);
+
+const firebaseMulterHandler = async (fileBuffer, originalName, folder) => {
+  const fileName = `${folder}/${Date.now()}-${uuidv4()}${path.extname(originalName)}`;
+  const file = bucket.file(fileName);
+
+  // Save file buffer to Firebase Storage
+  await file.save(fileBuffer, {
+    metadata: { contentType: "image/jpeg" }, // Adjust content type as needed
   });
 
-const bucket = admin.storage().bucket();
+  // Make the file publicly accessible
+  await file.makePublic();
 
-// Multer middleware for handling file uploads to Firebase Storage
-const firebaseMulterHandler = (req, res, next) => {
-    console.log(req, req.file, next);
-  if (!req.files || req.files.length === 0) {
-    return res.status(400).json({ error: 'No files uploaded' });
-  }
-
-  const uploadPromises = req.files.map((file) => {
-    const blob = bucket.file(file.filename);
-    const blobStream = blob.createWriteStream();
-
-    return new Promise((resolve, reject) => {
-      blobStream.on('finish', () => {
-        const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
-        req.fileUrls = req.fileUrls || [];
-        req.fileUrls.push(publicUrl);
-        resolve();
-      });
-
-      blobStream.on('error', (error) => {
-        reject(`Unable to upload file: ${error}`);
-      });
-
-      blobStream.end(file.buffer);
-    });
-  });
-
-  Promise.all(uploadPromises)
-    .then(() => next())
-    .catch((error) => res.status(500).json({ error }));
+  // Construct public URL
+  const publicUrl = `https://storage.googleapis.com/${bucket.name}/${file.name}`;
+  return publicUrl;
 };
 
 module.exports = { firebaseMulterHandler };
