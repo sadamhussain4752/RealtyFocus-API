@@ -1,7 +1,8 @@
 // routes/amenitiesRoutes.js
 const express = require("express");
-const multer = require("multer");
+const { uploadHandler } = require("../../Image/multerSetup");
 const router = express.Router();
+
 
 const {
   getAllAmenities,
@@ -11,11 +12,9 @@ const {
 } = require("../../controllers/AddAmenities/amenitiesController");
 
 // Multer memory storage for file uploads
-const upload = multer({ storage: multer.memoryStorage() });
-
 router.get("/", getAllAmenities);
-router.post("/", upload.single("image"), createAmenity);
-router.put("/:id", upload.single("image"), updateAmenity);
+router.post("/", uploadHandler, createAmenity);
+router.put("/:id", uploadHandler, updateAmenity);
 router.delete("/:id", deleteAmenity);
 
 module.exports = router;

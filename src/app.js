@@ -46,6 +46,7 @@ const PropTypeRoutes = require('./routes/AddPropTypeRoutes/PropTypeRoutes');
 const MicrositeMetaTagRoutes = require('./routes/AddMicrositeMetaTagRoutes/MicrositeMetaTagRoutes');
 const accessRoutes = require("./routes/accessControl");
 const profileRoutes = require("./routes/ProfileRoutes/profileRoutes");
+const adminRoutes = require("./routes/AddadminRoutes/adminRoutes");
 
 
 
@@ -121,6 +122,7 @@ app.use('/api/prop-status', PropstatusRoutes);
 app.use('/api/prop-type', PropTypeRoutes);
 app.use("/api/access", accessRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api", adminRoutes);
 
 
 

@@ -1,12 +1,11 @@
 // firebase/firebaseSetup.js
 const admin = require('firebase-admin');
-const serviceAccount = require('./realtyfocus-94962-firebase-adminsdk-fbsvc-58e31fd75f.json');
+const serviceAccount = require('./email-js-1a09b-firebase-adminsdk-ensw9-93ddb0e54d.json');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  storageBucket: "realtyfocus-94962.appspot.com", // ✅ match this
+  storageBucket: 'gs://email-js-1a09b.appspot.com',
 });
-
 
 const bucket = admin.storage().bucket();
 

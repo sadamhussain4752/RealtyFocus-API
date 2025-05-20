@@ -3,11 +3,11 @@ const { Storage } = require('@google-cloud/storage');
 const path = require("path");
 
 const storage = new Storage({
-  keyFilename: require("../file/realtyfocus-94962-firebase-adminsdk-fbsvc-58e31fd75f.json"),
-  projectId: 'realtyfocus-94962',
+  keyFilename: path.join(__dirname, '..', 'file', 'email-js-1a09b-firebase-adminsdk-ensw9-93ddb0e54d.json'),
+  projectId: 'email-js-1a09b',
 });
 
-const bucketName = 'realtyfocus-94962.appspot.com';
+const bucketName = 'email-js-1a09b.appspot.com';
 const bucket = storage.bucket(bucketName);
 
 const multerMemoryStorage = multer.memoryStorage();
@@ -45,7 +45,7 @@ const uploadHandler = (req, res, next) => {
       console.log(`Processing file: ${file.originalname}`);
       console.log(`File size: ${file.size} bytes`);
 
-      const folderName = 'localHeros/';
+      const folderName = 'realtfocus/';
       const newFileName = Date.now() + '-' + Math.round(Math.random() * 1E9);
 
       const destination = `${folderName}${newFileName}`;

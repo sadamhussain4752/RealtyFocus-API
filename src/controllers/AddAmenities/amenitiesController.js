@@ -38,10 +38,13 @@ exports.updateAmenity = async (req, res) => {
   try {
     const { id } = req.params;
     const { name } = req.body;
-    let imageUrl = req.body.image; // Keep old image if no new upload
 
+    let imageUrl = ""; // Keep old image if no new upload
+
+    console.log(req);
     if (req.file) {
-      imageUrl = await firebaseMulterHandler(req.file.buffer, req.file.originalname, "amenities");
+
+      imageUrl = req.fileUrls[0];
     }
 
     const [result] = await pool.query(
