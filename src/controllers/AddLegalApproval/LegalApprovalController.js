@@ -13,7 +13,12 @@ exports.getAllLegalApprovals = async (req, res) => {
 
 // ➤ Create a New Legal Approval (CREATE)
 exports.createLegalApproval = async (req, res) => {
-  const { name, image } = req.body;
+  const { name } = req.body;
+
+  const urls = req.uploadedUrls || {};
+
+  const image = urls?.image?.[0] || '';
+
   try {
     const [result] = await pool.query(
       'INSERT INTO legalapproval (name, image) VALUES (?, ?)',
@@ -29,21 +34,22 @@ exports.createLegalApproval = async (req, res) => {
 exports.updateLegalApproval = async (req, res) => {
   const { id } = req.params;
   const { name } = req.body;
-  const imageUrl = req.fileUrls?.[0]; // only update if a new image is uploaded
+  const image = req.uploadedUrls?.image?.[0] || null;
 
   try {
-    let query = 'UPDATE legalapproval SET name = ?';
-    const params = [name];
+    const fields = ['name = ?'];
+    const values = [name];
 
-    if (imageUrl) {
-      query += ', image = ?';
-      params.push(imageUrl);
+    if (image) {
+      fields.push('image = ?');
+      values.push(image);
     }
 
-    query += ' WHERE legal_id = ?';
-    params.push(id);
+    values.push(id); // for WHERE clause
 
-    const [result] = await pool.query(query, params);
+    const query = `UPDATE legalapproval SET ${fields.join(', ')} WHERE legal_id = ?`;
+
+    const [result] = await pool.query(query, values);
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Legal approval not found' });
@@ -51,9 +57,11 @@ exports.updateLegalApproval = async (req, res) => {
 
     res.json({ message: 'Legal approval updated successfully' });
   } catch (error) {
+    console.error('❌ Error updating Legal approval:', error);
     res.status(500).json({ error: 'Error updating Legal approval', message: error.message });
   }
 };
+
 
 
 // ➤ Delete a Legal Approval (DELETE)

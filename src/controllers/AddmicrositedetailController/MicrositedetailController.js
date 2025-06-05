@@ -4,9 +4,10 @@ const pool = require('../../db');
 exports.getAllMicrositeDetails = async (req, res) => {
   try {
     const [rows] = await pool.query(`
-      SELECT md.*, m.*
+      SELECT md.*, m.name
       FROM microsite_detail md
       JOIN microsite m ON md.micro_id = m.micro_id
+      ORDER BY md.md_id DESC;
     `);
 
     // Optionally parse am_id for all rows (if needed)
@@ -55,16 +56,46 @@ exports.getMicrositeDetailById = async (req, res) => {
 exports.createMicrositeDetail = async (req, res) => {
   try {
     const {
-      featured_image, micro_id, builder_id, am_id, bank_id, legal_id, rera, about, type_id, status_id,
-      masterplan_image, locationmap_title, longitude, latitude, location_image, gallery_image,
-      slider_image, adv_image, mlogo, price, max_price, min_price, rooms, address, location,
+      micro_id, builder_id, am_id, bank_id, legal_id, rera, about, type_id, status_id,
+      locationmap_title, longitude, latitude,
+      price, max_price, min_price, rooms, address, location,
       phone, email, built_area, area_unit, totalarea
     } = req.body;
 
-    // Convert am_id to JSON string (if array or object)
-    const amIdJSON = am_id ? JSON.stringify(am_id) : null;
-    const bankIdCSV = Array.isArray(bank_id) ? bank_id.join(",") : bank_id;
-    const legalIdCSV = Array.isArray(legal_id) ? legal_id.join(",") : legal_id;
+    /*console.log('Received Body:', req.body);
+    console.log('Files:', req.files);
+    console.log('Uploaded URLs:', req.uploadedUrls);*/
+
+    //const amIdJSON = am_id ? JSON.stringify(am_id) : '';
+
+    let amIdJSON = "[]"; // default empty array as string
+
+    if (req.body.am_id) {
+      try {
+        // Try parsing if it's valid JSON
+        const parsedAmId = JSON.parse(req.body.am_id);
+        amIdJSON = Array.isArray(parsedAmId) ? JSON.stringify(parsedAmId) : "[]";
+      } catch (e) {
+        console.error("Invalid JSON for am_id:", req.body.am_id);
+        amIdJSON = "[]";
+      }
+    } else {
+      amIdJSON = "[]";
+    }
+
+
+    const bankIdCSV = Array.isArray(bank_id) ? bank_id.join(",") : (bank_id || '');
+    const legalIdCSV = Array.isArray(legal_id) ? legal_id.join(",") : (legal_id || '');
+
+    const urls = req.uploadedUrls || {};
+
+    const featured_image = urls?.featured_image?.[0] || '';
+    const masterplan_image = urls?.masterplan_image?.[0] || '';
+    const location_image = urls?.location_image?.[0] || '';
+    const gallery_image = urls?.gallery_image?.length ? urls.gallery_image.join(',') : '';
+    const slider_image = urls?.slider_image?.length ? urls.slider_image.join(',') : '';
+    const adv_image = urls?.adv_image?.[0] || '';
+    const mlogo = urls?.mlogo?.[0] || '';
 
     const [result] = await pool.query(
       `INSERT INTO microsite_detail 
@@ -83,33 +114,59 @@ exports.createMicrositeDetail = async (req, res) => {
 
     res.status(201).json({ message: 'Microsite detail created successfully', md_id: result.insertId });
   } catch (error) {
+    console.error('❌ Error creating microsite detail:', error);
     res.status(500).json({ error: 'Error creating microsite detail', message: error.message });
   }
 };
+
+
+
 
 // Update microsite detail by ID
 exports.updateMicrositeDetail = async (req, res) => {
   try {
     const { id } = req.params;
     const {
-      featured_image, micro_id, builder_id, am_id, bank_id, legal_id, rera, about, type_id, status_id,
-      masterplan_image, locationmap_title, longitude, latitude, location_image, gallery_image,
-      slider_image, adv_image, mlogo, price, max_price, min_price, rooms, address, location,
+      micro_id, builder_id, am_id, bank_id, legal_id, rera, about, type_id, status_id,
+      locationmap_title, longitude, latitude,
+      price, max_price, min_price, rooms, address, location,
       phone, email, built_area, area_unit, totalarea
     } = req.body;
 
-    // Convert am_id to JSON string (if array or object)
-    const amIdJSON = am_id ? JSON.stringify(am_id) : null;
-    const bankIdCSV = Array.isArray(bank_id) ? bank_id.join(",") : bank_id;
-    const legalIdCSV = Array.isArray(legal_id) ? legal_id.join(",") : legal_id;
+    let amIdJSON = "[]"; // default empty array as string
+
+    if (req.body.am_id) {
+      try {
+        // Try parsing if it's valid JSON
+        const parsedAmId = JSON.parse(req.body.am_id);
+        amIdJSON = Array.isArray(parsedAmId) ? JSON.stringify(parsedAmId) : "[]";
+      } catch (e) {
+        console.error("Invalid JSON for am_id:", req.body.am_id);
+        amIdJSON = "[]";
+      }
+    } else {
+      amIdJSON = "[]";
+    }
+    const bankIdCSV = Array.isArray(bank_id) ? bank_id.join(",") : (bank_id || '');
+    const legalIdCSV = Array.isArray(legal_id) ? legal_id.join(",") : (legal_id || '');
+
+    const urls = req.uploadedUrls || {};
+
+    const featured_image = urls?.featured_image?.[0] || '';
+    const masterplan_image = urls?.masterplan_image?.[0] || '';
+    const location_image = urls?.location_image?.[0] || '';
+    const gallery_image = urls?.gallery_image?.length ? urls.gallery_image.join(',') : '';
+    const slider_image = urls?.slider_image?.length ? urls.slider_image.join(',') : '';
+    const adv_image = urls?.adv_image?.[0] || '';
+    const mlogo = urls?.mlogo?.[0] || '';
 
     const [result] = await pool.query(
       `UPDATE microsite_detail SET 
-      featured_image = ?, micro_id = ?, builder_id = ?, am_id = ?, bank_id = ?, legal_id = ?, 
-      rera = ?, about = ?, type_id = ?, status_id = ?, masterplan_image = ?, locationmap_title = ?, 
-      longitude = ?, latitude = ?, location_image = ?, gallery_image = ?, slider_image = ?, 
-      adv_image = ?, mlogo = ?, price = ?, max_price = ?, min_price = ?, rooms = ?, address = ?, 
-      location = ?, phone = ?, email = ?, built_area = ?, area_unit = ?, totalarea = ? 
+        featured_image = ?, micro_id = ?, builder_id = ?, am_id = ?, bank_id = ?, legal_id = ?, 
+        rera = ?, about = ?, type_id = ?, status_id = ?, masterplan_image = ?, locationmap_title = ?, 
+        longitude = ?, latitude = ?, location_image = ?, gallery_image = ?, slider_image = ?, 
+        adv_image = ?, mlogo = ?, price = ?, max_price = ?, min_price = ?, rooms = ?, address = ?, 
+        location = ?, phone = ?, email = ?, built_area = ?, area_unit = ?, totalarea = ? 
       WHERE md_id = ?`,
       [
         featured_image, micro_id, builder_id, amIdJSON, bankIdCSV, legalIdCSV, rera, about, type_id, status_id,
@@ -119,13 +176,17 @@ exports.updateMicrositeDetail = async (req, res) => {
       ]
     );
 
-    if (result.affectedRows === 0) return res.status(404).json({ message: 'Microsite detail not found' });
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Microsite detail not found' });
+    }
 
     res.status(200).json({ message: 'Microsite detail updated successfully' });
   } catch (error) {
+    console.error('❌ Error updating microsite detail:', error);
     res.status(500).json({ error: 'Error updating microsite detail', message: error.message });
   }
 };
+
 
 // Delete microsite detail by ID
 exports.deleteMicrositeDetail = async (req, res) => {

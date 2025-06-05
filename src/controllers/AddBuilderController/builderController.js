@@ -26,7 +26,12 @@ exports.getBuilderById = async (req, res) => {
 
 // ➤ Create a New Builder (CREATE)
 exports.createBuilder = async (req, res) => {
-  const { name, logo, address, about } = req.body;
+  const { name, address, about } = req.body;
+
+  const urls = req.uploadedUrls || {};
+
+  const logo = urls?.logo?.[0] || '';
+
   try {
     const [result] = await pool.query(
       'INSERT INTO builder (name, logo, address, about) VALUES (?, ?, ?, ?)',
@@ -41,7 +46,12 @@ exports.createBuilder = async (req, res) => {
 // ➤ Update a Builder (UPDATE)
 exports.updateBuilder = async (req, res) => {
   const { id } = req.params;
-  const { name, logo, address, about } = req.body;
+  const { name, address, about } = req.body;
+
+  const urls = req.uploadedUrls || {};
+
+  const logo = urls?.logo?.[0] || '';
+
   try {
     const [result] = await pool.query(
       'UPDATE builder SET name = ?, logo = ?, address = ?, about = ? WHERE builder_id = ?',

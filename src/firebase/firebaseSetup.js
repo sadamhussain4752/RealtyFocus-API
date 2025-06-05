@@ -1,12 +1,24 @@
 // firebase/firebaseSetup.js
 const admin = require('firebase-admin');
-const serviceAccount = require('../file/email-js-1a09b-firebase-adminsdk-ensw9-93ddb0e54d.json');
+const serviceAccount = require('../file/email-js-1a09b-firebase-adminsdk-ensw9-ce43bbc98e.json');
+
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   storageBucket: 'gs://email-js-1a09b.appspot.com',
 });
 
+/*
+admin.initializeApp({
+  credential: admin.credential.cert({
+    project_id: "email-js-1a09b",
+    private_key_id: "bb18cc3ff20aeba92bb37cffc07225517330ba54",
+    private_key: process.env.PRIVATE_KEY.replace(/\\n/g, '\n'),
+    client_email: "firebase-adminsdk-ensw9@email-js-1a09b.iam.gserviceaccount.com",
+  }),
+  storageBucket: "gs://email-js-1a09b.appspot.com",
+});
+*/
 const bucket = admin.storage().bucket();
 
 // Multer middleware for handling file uploads to Firebase Storage

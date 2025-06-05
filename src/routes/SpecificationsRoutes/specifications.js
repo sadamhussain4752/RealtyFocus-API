@@ -1,5 +1,6 @@
 // routes/Specifications.js
 const express = require('express');
+const { uploadHandler } = require("../../Image/multerSetup");
 const router = express.Router();
 const {
   getAllSpecifications,
@@ -9,8 +10,8 @@ const {
 } = require('../../controllers/AddSpecifications/SpecificationsController');
 
 router.get('/', getAllSpecifications);         // GET all Specifications
-router.post('/', createSpecifications);          // CREATE a new Specifications
-router.put('/:id', updateSpecifications);        // UPDATE an Specifications by ID
+router.post('/', uploadHandler, createSpecifications);          // CREATE a new Specifications
+router.put('/:id', uploadHandler, updateSpecifications);        // UPDATE an Specifications by ID
 router.delete('/:id', deleteSpecifications);     // DELETE an Specifications by ID
 
 module.exports = router;

@@ -15,6 +15,9 @@ const {
 router.get("/", getAllAmenities);
 router.post("/", uploadHandler, createAmenity);
 router.put("/:id", uploadHandler, updateAmenity);
+/*
+router.post("/", uploadHandler('amenities'), createAmenity);
+router.put("/:id", uploadHandler('amenities'), updateAmenity);*/
 router.delete("/:id", deleteAmenity);
 
 module.exports = router;

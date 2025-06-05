@@ -4,12 +4,101 @@ const pool = require('../../db');
 // Get all microsites
 exports.getAllMicrosites = async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM microsite');
-    res.status(200).json(rows);
+    const [rows] = await pool.query(`SELECT * FROM microsite ORDER BY micro_id DESC`);
+    const parsedRows = rows.map(row => {
+      let possessionValue = row.possession;
+      let formattedPossession = possessionValue;
+
+      if (typeof possessionValue === 'string') {
+        try {
+          const parsed = JSON.parse(possessionValue);
+          if (Array.isArray(parsed)) {
+            formattedPossession = parsed;
+          }
+        } catch (e) {
+          formattedPossession = possessionValue;
+        }
+      }
+
+      return {
+        ...row,
+        possession: formattedPossession,
+      };
+    });
+
+    res.status(200).json(parsedRows);
   } catch (error) {
     res.status(500).json({ error: 'Error fetching microsites', message: error.message });
   }
 };
+
+
+exports.getAllMicrositesMain = async (req, res) => {
+  try {
+    const [rows] = await pool.query(`SELECT  
+     MIN(price.sqft) AS min_sqft,
+     MAX(price.sqft) AS max_sqft,
+     microsite.possession,
+     MIN(price.basic_cost) AS min_basic_cost,
+     MAX(price.basic_cost) AS max_basic_cost,
+     microsite_detail.latitude,
+     microsite_detail.longitude,
+     microsite_detail.about AS aa,
+     prop_status.status,
+     LOWER(prop_type.type) AS type,
+     microsite.micro_id,
+     LOWER(microsite.location) AS location,
+     microsite.name,
+     microsite.city,
+     microsite.zone,
+     microsite.project_type,
+     microsite_detail.featured_image,
+     microsite_detail.builder_id,
+     LOWER(microsite_detail.rooms) AS rooms,
+     builder.logo AS logo,
+     builder.name AS builder_name
+     FROM microsite
+     LEFT JOIN microsite_detail 
+       ON microsite.micro_id = microsite_detail.micro_id
+     LEFT JOIN builder 
+       ON microsite_detail.builder_id = builder.builder_id
+     LEFT JOIN prop_status 
+       ON prop_status.status_id = microsite_detail.status_id
+     LEFT JOIN prop_type 
+       ON prop_type.type_id = microsite_detail.type_id
+     LEFT JOIN price 
+       ON price.micro_id = microsite.micro_id
+     WHERE price.basic_cost != 0
+     GROUP BY microsite.micro_id
+     ORDER BY microsite.micro_id DESC`);
+
+    const parsedRows = rows.map(row => {
+      let possessionValue = row.possession;
+      let formattedPossession = possessionValue;
+
+      if (typeof possessionValue === 'string') {
+        try {
+          const parsed = JSON.parse(possessionValue);
+          if (Array.isArray(parsed)) {
+            formattedPossession = parsed;
+          }
+        } catch (e) {
+          formattedPossession = possessionValue;
+        }
+      }
+
+      return {
+        ...row,
+        possession: formattedPossession,
+      };
+    });
+
+    res.status(200).json(parsedRows);
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching microsites', message: error.message });
+  }
+};
+
 
 // Get all microsites in descending order with pagination, optionally filtering for featured microsites
 
@@ -98,6 +187,8 @@ exports.getMicrositeByName = async (req, res) => {
     );
     microsite.floorplan = floorRows.length > 0 ? floorRows : [];
 
+
+    console.log(floorRows);
 
     const amIds = microsite.details.am_id
       .split(',')
@@ -207,11 +298,13 @@ exports.createMicrosite = async (req, res) => {
       sprice
     } = req.body;
 
+    const possessionJSON = possession ? JSON.stringify(possession) : null;
+
     const [result] = await pool.query(
       `INSERT INTO microsite 
       (name, possession, project_type, rera_no, possession_date, no_of_units, total_area, location, sub_location, zone, city, sprice) 
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [name, possession, project_type, rera_no, 'null', no_of_units, total_area, location, sub_location, zone, city, sprice]
+      [name, possessionJSON, project_type, rera_no, 'null', no_of_units, total_area, location, sub_location, zone, city, sprice]
     );
 
     res.status(201).json({ message: 'Microsite created successfully', micro_id: result.insertId });
@@ -239,12 +332,14 @@ exports.updateMicrosite = async (req, res) => {
       sprice
     } = req.body;
 
+    const possessionJSON = possession ? JSON.stringify(possession) : null;
+
     const [result] = await pool.query(
       `UPDATE microsite 
       SET name = ?, possession = ?, project_type = ?, rera_no = ?, possession_date = ?, no_of_units = ?, 
           total_area = ?, location = ?, sub_location = ?, zone = ?, city = ?, sprice = ? 
       WHERE micro_id = ?`,
-      [name, possession, project_type, rera_no, possession_date, no_of_units, total_area, location, sub_location, zone, city, sprice, id]
+      [name, possessionJSON, project_type, rera_no, possession_date, no_of_units, total_area, location, sub_location, zone, city, sprice, id]
     );
 
     if (result.affectedRows === 0) return res.status(404).json({ message: 'Microsite not found' });

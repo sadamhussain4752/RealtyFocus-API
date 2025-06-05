@@ -13,7 +13,12 @@ exports.getAllBankApprovals = async (req, res) => {
 
 // ➤ Create a New Bank Approval (CREATE)
 exports.createBankApproval = async (req, res) => {
-  const { name, image } = req.body;
+  const { name } = req.body;
+
+  const urls = req.uploadedUrls || {};
+
+  const image = urls?.image?.[0] || '';
+
   try {
     const [result] = await pool.query(
       'INSERT INTO bankapproval (name, image) VALUES (?, ?)',
@@ -29,21 +34,24 @@ exports.createBankApproval = async (req, res) => {
 exports.updateBankApproval = async (req, res) => {
   const { id } = req.params;
   const { name } = req.body;
-  const imageUrl = req.fileUrls?.[0]; // only update if a new image is uploaded
+
+  // Handle uploaded image
+  const image = req.uploadedUrls?.image?.[0] || null;
 
   try {
-    let query = 'UPDATE bankapproval SET name = ?';
-    const params = [name];
+    const fields = ["name = ?"];
+    const values = [name];
 
-    if (imageUrl) {
-      query += ', image = ?';
-      params.push(imageUrl);
+    if (image) {
+      fields.push("image = ?");
+      values.push(image);
     }
 
-    query += ' WHERE bank_id = ?';
-    params.push(id);
+    values.push(id); // Add the id for WHERE clause
 
-    const [result] = await pool.query(query, params);
+    const query = `UPDATE bankapproval SET ${fields.join(", ")} WHERE bank_id = ?`;
+
+    const [result] = await pool.query(query, values);
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Bank approval not found' });
@@ -51,9 +59,11 @@ exports.updateBankApproval = async (req, res) => {
 
     res.json({ message: 'Bank approval updated successfully' });
   } catch (error) {
+    console.error("❌ Error updating bank approval:", error);
     res.status(500).json({ error: 'Error updating bank approval', message: error.message });
   }
 };
+
 
 
 // ➤ Delete a Bank Approval (DELETE)

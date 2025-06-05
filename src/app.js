@@ -30,6 +30,7 @@ const TaskRoutes = require("./routes/AddTaskRoutes/TaskRoutes");
 const UserRoleRoutes = require("./routes/UserRoleRoutes/UserRoleRoutes");
 const amenitiesRoutes = require('./routes/AmenitiesRoutes/amenities');
 const specificationsRoutes = require('./routes/SpecificationsRoutes/specifications');
+const SpecificationsDetailRoutes = require('./routes/SpecificationsDetailRoutes/specificationsdetail');
 const BankapprovalRoutes = require('./routes/BankapprovalRoutes/bankapprovalRoutes');
 const LegalapprovalRoutes = require('./routes/LegalapprovalRoutes/LegalapprovalRoutes');
 const BlogsRoutes = require('./routes/AddBlogsRoutes/BlogsRoutes');
@@ -59,7 +60,7 @@ app.use(cors());
 
 
 // Use express.static to serve static files (including images)
-app.use(express.static(path.join(__dirname, "./../uploads")));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const port = process.env.PORT || 4000;
 
@@ -106,6 +107,7 @@ app.use("/api/projects", ProjectRoutes);
 app.use("/api/task", TaskRoutes);
 app.use('/api/amenities', amenitiesRoutes);
 app.use('/api/specifications', specificationsRoutes);
+app.use('/api/specificationsdetail', SpecificationsDetailRoutes);
 app.use('/api/bankapproval', BankapprovalRoutes);
 app.use('/api/legalapproval', LegalapprovalRoutes);
 app.use('/api/blogs', BlogsRoutes);
