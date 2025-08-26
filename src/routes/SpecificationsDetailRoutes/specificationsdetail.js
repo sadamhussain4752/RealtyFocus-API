@@ -6,7 +6,7 @@ const {
     createDetailSpecifications,
     updateDetailSpecifications,
     deleteDetailSpecifications,
-} = require('../../controllers/AddSpecifications/SpecificationsController');
+} = require('../../controllers/AddSpecifications/AllSpecificationsController');
 
 router.get('/', getAllDetailSpecifications);         // GET all Specifications
 router.post('/', createDetailSpecifications);          // CREATE a new Specifications
